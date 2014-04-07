@@ -169,3 +169,25 @@ describe "time source" do
     CronParser.new("* * * * *",ExtendedTime).next
   end
 end
+
+describe "timezones" do
+
+  it "should maintain the same time zone as the source time" do
+    line, now, expected_next = ["*/15 * * * *",          "2011-08-15 02:02",  "2011-08-15 02:15"]
+    now = parse_date(now)
+    utc = Time.utc(*now.to_a)
+    expected_next = parse_date(expected_next)
+    expected_next_utc = Time.utc(*expected_next.to_a)
+    parser = CronParser.new(line)
+    # Local zone stays local
+    actual_next = parser.next(now)
+    actual_next.should == expected_next
+    actual_next.zone.should == now.zone
+   
+    # UTC zone stays UTC
+    actual_next = parser.next(utc)
+    actual_next.zone.should == utc.zone
+    actual_next.should == expected_next_utc
+  end
+
+end
